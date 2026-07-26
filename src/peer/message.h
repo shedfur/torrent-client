@@ -1,4 +1,4 @@
 #pragma once
 #include "peer.h"
 
-void message(PeerConnection& connectedPeers);
+void messageLoop(PeerConnection &connectedPeer, Torrent& torrent);

@@ -88,7 +88,7 @@ void announceHTTPS(const Torrent &torrent, const Tracker &tracker, std::unordere
         "&uploaded=0" +
         "&downloaded=0" +
         "&left=" +
-        std::to_string(torrent.length) +
+        std::to_string(torrent.piecelength) +
         "&compact=1" +
         "&event=started" +
         " HTTP/1.1\r\n" +
@@ -178,7 +178,7 @@ void announceHTTP(const Torrent &torrent, const Tracker &tracker, std::unordered
         "&uploaded=0" +
         "&downloaded=0" +
         "&left=" +
-        std::to_string(torrent.length) +
+        std::to_string(torrent.piecelength) +
         "&compact=1" +
         "&event=started" +
         " HTTP/1.1\r\n" +
@@ -367,14 +367,14 @@ std::string urlEncode(const uint8_t *data, size_t len)
 
 void httpTracker(const Torrent &torrent, const Tracker &tracker, std::unordered_set<Peer, PeerHash> &peers, std::mutex &peersMutex)
 {
-    // if (tracker.protocol == "http")
-    //     announceHTTP(torrent, tracker, peers, peersMutex);
+    if (tracker.protocol == "http")
+        announceHTTP(torrent, tracker, peers, peersMutex);
 
-    if (tracker.protocol == "https")
+    else if (tracker.protocol == "https")
         announceHTTPS(torrent, tracker, peers, peersMutex);
 
-    // else
-    //     throw std::runtime_error("Invalid protocol");
+    else
+        throw std::runtime_error("Invalid protocol");
 }
 
 bool isIPv6(const std::string &ip)

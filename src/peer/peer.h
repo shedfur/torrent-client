@@ -10,9 +10,8 @@ struct PeerConnection
 
     bool handshakeDone;
 
-    bool choked;
-
-    bool interested;
+    bool choked = true;      // they are choking us
+    bool interested = false; // they are interested in us
 
     std::vector<bool> bitfield;
 };

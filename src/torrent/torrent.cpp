@@ -28,13 +28,12 @@ Torrent LoadTorrent(const std::string &filename)
     std::string announce = std::get<std::string>((*result.at("announce")).value);
     torrent.trackers.push_back(trackerParser(announce));
 
-
     // extract announcelist
-    List& announcelist = std::get<List>((*result.at("announce-list")).value);
+    List &announcelist = std::get<List>((*result.at("announce-list")).value);
     size_t listlen = announcelist.size();
     for (size_t i = 0; i < listlen; i++)
     {
-        List& furtherlist = std::get<List>((*announcelist[i]).value);
+        List &furtherlist = std::get<List>((*announcelist[i]).value);
         size_t flistlen = furtherlist.size();
         for (size_t j = 0; j < flistlen; j++)
         {
@@ -52,8 +51,8 @@ Torrent LoadTorrent(const std::string &filename)
     int64_t length = std::get<int64_t>((*info.at("length")).value);
     torrent.length = length;
 
-    int64_t piecelength = std::get<int64_t>((*info.at("piece length")).value);
-    torrent.length = piecelength;
+    int32_t piecelength = std::get<int64_t>((*info.at("piece length")).value);
+    torrent.piecelength = piecelength;
 
     // compute info hash
     inputFile.clear();
@@ -79,14 +78,16 @@ Torrent LoadTorrent(const std::string &filename)
         std::memcpy(pieceHash.data(), pieces.data() + i, 20);
 
         torrent.pieceHashes.push_back(pieceHash);
+        torrent.bitfield.push_back(false);
     }
 
-    for(size_t i = 0; i < torrent.trackers.size(); i++){
-        std::cout << "protocol: " << torrent.trackers[i].protocol << "    " << 
-        "host: " << torrent.trackers[i].host << "    " <<
-        "port: " << torrent.trackers[i].port << "    " << 
-        "path: " << torrent.trackers[i].path << std::endl;
+    for (size_t i = 0; i < torrent.trackers.size(); i++)
+    {
+        std::cout << "protocol: " << torrent.trackers[i].protocol << "    " << "host: " << torrent.trackers[i].host << "    " << "port: " << torrent.trackers[i].port << "    " << "path: " << torrent.trackers[i].path << std::endl;
     }
+    
+    std::ofstream create(torrent.name, std::ios::binary);
+    create.close();
 
     return torrent;
 }

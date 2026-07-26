@@ -41,8 +41,9 @@ int main()
                   << +peer.ip[2] << "."
                   << +peer.ip[3] << '\n';
 
-        if (connectPeer(peer, connectedPeers) == 0)
+        if (connectPeer(peer, connectedPeers) == 0){
             connected++;
+        }
     }
 
     // handShake(peers);
@@ -53,8 +54,11 @@ int main()
               << " peers\n";
     for (auto &connectedPeer : connectedPeers)
     {
-        if (handShake(connectedPeer, torrent.infoHash))
-            message(connectedPeer);
+        if (handShake(connectedPeer, torrent.infoHash)){
+            messageLoop(connectedPeer, torrent);
+        }
+        else
+            close(connectedPeer.socket);
     }
 
     return 0;

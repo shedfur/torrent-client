@@ -31,6 +31,16 @@ bool handShake(PeerConnection &peerconnection, std::array<uint8_t, 20> &infoHash
     uint8_t response[68];
     size_t totalReceived = 0;
 
+    timeval tv{};
+    tv.tv_sec = 2;
+    tv.tv_usec = 0;
+
+    setsockopt(peerconnection.socket,
+               SOL_SOCKET,
+               SO_RCVTIMEO,
+               &tv,
+               sizeof(tv));
+
     while (totalReceived < 68)
     {
         ssize_t n = recv(
@@ -42,14 +52,20 @@ bool handShake(PeerConnection &peerconnection, std::array<uint8_t, 20> &infoHash
         if (n == 0)
         {
             std::cout << "Peer closed connection\n";
-            close(peerconnection.socket);
             return false;
         }
 
         if (n < 0)
         {
-            perror("recv");
-            close(peerconnection.socket);
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+            {
+                std::cout << "Handshake timed out\n";
+            }
+            else
+            {
+                perror("recv");
+            }
+
             return false;
         }
 
@@ -58,19 +74,16 @@ bool handShake(PeerConnection &peerconnection, std::array<uint8_t, 20> &infoHash
 
     if (response[0] != 19)
     {
-        close(peerconnection.socket);
         return false;
     }
 
     if (memcmp(response + 1, "BitTorrent protocol", 19) != 0)
     {
-        close(peerconnection.socket);
         return false;
     }
 
     if (memcmp(response + 28, infoHash.data(), 20) != 0)
     {
-        close(peerconnection.socket);
         return false;
     }
 
